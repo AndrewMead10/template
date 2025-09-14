@@ -54,7 +54,7 @@ This template implements a modern full-stack application with:
    # Initialize database
    uv run alembic upgrade head
    # Start backend
-   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 5656
    ```
 
 3. **Frontend setup** (in a new terminal):
@@ -66,8 +66,8 @@ This template implements a modern full-stack application with:
 
 4. **Access the application**:
    - Frontend: http://localhost:3000 (development)
-   - Backend API: http://localhost:8000
-   - API Docs: http://localhost:8000/docs
+   - Backend API: http://localhost:5656
+   - API Docs: http://localhost:5656/docs
 
 ### Production Deployment
 
@@ -79,8 +79,8 @@ This template implements a modern full-stack application with:
    ```
 
 2. **Access the application**:
-   - Application: http://localhost:8000
-   - API Docs: http://localhost:8000/docs
+   - Application: http://localhost:5656
+   - API Docs: http://localhost:5656/docs
 
 ## Architecture
 
