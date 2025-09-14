@@ -5,6 +5,11 @@ export interface LoginData {
   password: string
 }
 
+export interface RegisterData {
+  email: string
+  password: string
+}
+
 export interface User {
   id: number
   email: string
@@ -15,7 +20,7 @@ export interface User {
 // API client functions
 const apiClient = {
   async login(data: LoginData): Promise<User> {
-    const response = await fetch('/auth/login', {
+    const response = await fetch('/auth/login/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -35,8 +40,21 @@ const apiClient = {
     return response.json()
   },
 
+  async register(data: RegisterData): Promise<User> {
+    const response = await fetch('/auth/register/onsubmit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Registration failed')
+    }
+    return response.json()
+  },
+
   async logout(): Promise<void> {
-    await fetch('/auth/logout', { method: 'POST' })
+    await fetch('/auth/logout/onsubmit', { method: 'POST' })
   },
 
   async getPageData(page: string): Promise<any> {
@@ -66,6 +84,10 @@ export function useAuth() {
     },
   })
 
+  const register = useMutation({
+    mutationFn: apiClient.register,
+  })
+
   const logout = useMutation({
     mutationFn: apiClient.logout,
     onSuccess: () => {
@@ -81,6 +103,7 @@ export function useAuth() {
 
   return {
     login,
+    register,
     logout,
     user: userQuery.data,
     isAuthenticated: !!userQuery.data && !userQuery.isError,

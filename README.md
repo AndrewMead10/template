@@ -27,7 +27,7 @@ A comprehensive full-stack service template with FastAPI, React, and authenticat
    pip install uv
    uv sync
    uv run alembic upgrade head
-   uv run uvicorn app.main:app --reload
+   uv run uvicorn app.main:app --reload --port 5656
    ```
 
 3. **Start frontend**:
