@@ -13,17 +13,8 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/auth/me': 'http://localhost:5656',
-      '/auth/refresh': 'http://localhost:5656',
-      '/auth/login/onsubmit': 'http://localhost:5656',
-      '/auth/register/onsubmit': 'http://localhost:5656',
-      '/auth/logout/onsubmit': 'http://localhost:5656',
-      '/auth/reset/onsubmit': 'http://localhost:5656',
-      '/dashboard/onload': 'http://localhost:5656',
-      '/dashboard/onsubmit': 'http://localhost:5656',
-      '/admin': 'http://localhost:5656',
-      '/livez': 'http://localhost:5656',
-      '/readyz': 'http://localhost:5656',
+      // Proxy all API calls to the backend during development
+      '/api': 'http://localhost:5656',
     },
   },
   build: {

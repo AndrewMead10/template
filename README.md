@@ -37,6 +37,11 @@ A comprehensive full-stack service template with FastAPI, React, and authenticat
    # Optional: generate OpenAPI types (requires backend running or openapi.json present)
    # npm run gen:types
    npm run dev
+
+   The frontend dev server runs on `http://localhost:3000` and proxies
+   any requests starting with `/api` to the backend on `http://localhost:5656`.
+   This avoids route collisions with client-side routes like `/auth/*` so
+   refreshing deep links works correctly.
    ```
 
 ### Production
@@ -46,6 +51,10 @@ cp .env.example .env
 # Configure production values in .env
 docker-compose up -d
 ```
+
+In production, the backend serves the built frontend from `/` and exposes all
+API endpoints under `/api`. For example, `GET /api/auth/me` and the SPA route
+`/auth/login` coexist without conflicts.
 
 ## Architecture
 

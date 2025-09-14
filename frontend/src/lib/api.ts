@@ -22,9 +22,9 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   const response = await fetch(url, options)
 
   // If we get a 401, try refreshing the token and retry once
-  if (response.status === 401 && url !== '/auth/refresh') {
+  if (response.status === 401 && url !== '/api/auth/refresh') {
     try {
-      await fetch('/auth/refresh', { method: 'POST' })
+      await fetch('/api/auth/refresh', { method: 'POST' })
       // Retry the original request
       return await fetch(url, options)
     } catch (refreshError) {
@@ -40,7 +40,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 // API client functions
 const apiClient = {
   async login(data: LoginData): Promise<User> {
-    const response = await fetch('/auth/login/onsubmit', {
+    const response = await fetch('/api/auth/login/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -53,7 +53,7 @@ const apiClient = {
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await fetchWithAuth('/auth/me')
+    const response = await fetchWithAuth('/api/auth/me')
     if (!response.ok) {
       throw new Error('Not authenticated')
     }
@@ -61,7 +61,7 @@ const apiClient = {
   },
 
   async register(data: RegisterData): Promise<any> {
-    const response = await fetch('/auth/register/onsubmit', {
+    const response = await fetch('/api/auth/register/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -74,18 +74,18 @@ const apiClient = {
   },
 
   async logout(): Promise<void> {
-    await fetchWithAuth('/auth/logout/onsubmit', { method: 'POST' })
+    await fetchWithAuth('/api/auth/logout/onsubmit', { method: 'POST' })
   },
 
   async refreshToken(): Promise<void> {
-    const response = await fetch('/auth/refresh', { method: 'POST' })
+    const response = await fetch('/api/auth/refresh', { method: 'POST' })
     if (!response.ok) {
       throw new Error('Token refresh failed')
     }
   },
 
   async resetRequest(email: string): Promise<void> {
-    const response = await fetch('/auth/reset-request/onsubmit', {
+    const response = await fetch('/api/auth/reset/onsubmit/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -97,7 +97,7 @@ const apiClient = {
   },
 
   async resetConfirm(token: string, newPassword: string): Promise<void> {
-    const response = await fetch('/auth/reset-confirm/onsubmit', {
+    const response = await fetch('/api/auth/reset/onsubmit/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, new_password: newPassword }),
@@ -109,7 +109,7 @@ const apiClient = {
   },
 
   async getPageData(page: string): Promise<any> {
-    const response = await fetchWithAuth(`/${page}/onload`)
+    const response = await fetchWithAuth(`/api/${page}/onload`)
     if (!response.ok) {
       const error = await response.json()
       throw new Error(error.message || `Failed to load ${page} data`)

@@ -24,13 +24,16 @@ app.middleware("http")(log_requests)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
-app.include_router(login.router)
-app.include_router(register.router)
-app.include_router(refresh.router)
-app.include_router(logout.router)
-app.include_router(me.router)
-app.include_router(reset.router)
-app.include_router(dashboard.router)
+# Mount all API routes under a common /api prefix to avoid
+# collisions with SPA client-side routes like /auth/* when
+# running the frontend dev server or refreshing deep links.
+app.include_router(login.router, prefix="/api")
+app.include_router(register.router, prefix="/api")
+app.include_router(refresh.router, prefix="/api")
+app.include_router(logout.router, prefix="/api")
+app.include_router(me.router, prefix="/api")
+app.include_router(reset.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
 
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
