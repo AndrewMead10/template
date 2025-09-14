@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useAuth } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { LogOut, User, Settings } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth()

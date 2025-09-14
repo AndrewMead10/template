@@ -57,6 +57,30 @@ const apiClient = {
     await fetch('/auth/logout/onsubmit', { method: 'POST' })
   },
 
+  async resetRequest(email: string): Promise<void> {
+    const response = await fetch('/auth/reset-request/onsubmit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Reset request failed')
+    }
+  },
+
+  async resetConfirm(token: string, newPassword: string): Promise<void> {
+    const response = await fetch('/auth/reset-confirm/onsubmit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, new_password: newPassword }),
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Password reset failed')
+    }
+  },
+
   async getPageData(page: string): Promise<any> {
     const response = await fetch(`/${page}/onload`)
     if (!response.ok) {
