@@ -27,7 +27,7 @@ function RegisterPage() {
         email: data.email,
         password: data.password
       })
-      navigate({ to: '/auth/login' })
+      navigate({ to: '/dashboard' })
     } catch (error) {
       console.error('Registration failed:', error)
     }
@@ -100,7 +100,7 @@ function RegisterPage() {
             
             {registerUser.isSuccess && (
               <p className="text-sm text-green-600">
-                Account created successfully! Please sign in.
+                Account created successfully! Redirecting...
               </p>
             )}
             

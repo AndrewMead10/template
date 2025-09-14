@@ -17,6 +17,26 @@ export interface User {
   roles: string[]
 }
 
+// Enhanced fetch with automatic token refresh
+async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+  const response = await fetch(url, options)
+
+  // If we get a 401, try refreshing the token and retry once
+  if (response.status === 401 && url !== '/auth/refresh') {
+    try {
+      await fetch('/auth/refresh', { method: 'POST' })
+      // Retry the original request
+      return await fetch(url, options)
+    } catch (refreshError) {
+      // If refresh fails, redirect to login
+      window.location.href = '/auth/login'
+      throw new Error('Authentication failed')
+    }
+  }
+
+  return response
+}
+
 // API client functions
 const apiClient = {
   async login(data: LoginData): Promise<User> {
@@ -33,14 +53,14 @@ const apiClient = {
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await fetch('/auth/me')
+    const response = await fetchWithAuth('/auth/me')
     if (!response.ok) {
       throw new Error('Not authenticated')
     }
     return response.json()
   },
 
-  async register(data: RegisterData): Promise<User> {
+  async register(data: RegisterData): Promise<any> {
     const response = await fetch('/auth/register/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -54,7 +74,14 @@ const apiClient = {
   },
 
   async logout(): Promise<void> {
-    await fetch('/auth/logout/onsubmit', { method: 'POST' })
+    await fetchWithAuth('/auth/logout/onsubmit', { method: 'POST' })
+  },
+
+  async refreshToken(): Promise<void> {
+    const response = await fetch('/auth/refresh', { method: 'POST' })
+    if (!response.ok) {
+      throw new Error('Token refresh failed')
+    }
   },
 
   async resetRequest(email: string): Promise<void> {
@@ -82,7 +109,7 @@ const apiClient = {
   },
 
   async getPageData(page: string): Promise<any> {
-    const response = await fetch(`/${page}/onload`)
+    const response = await fetchWithAuth(`/${page}/onload`)
     if (!response.ok) {
       const error = await response.json()
       throw new Error(error.message || `Failed to load ${page} data`)
@@ -110,12 +137,24 @@ export function useAuth() {
 
   const register = useMutation({
     mutationFn: apiClient.register,
+    onSuccess: (data) => {
+      // Extract user from the response (backend returns { success, message, user })
+      const user = data.user || data
+      queryClient.setQueryData(['user'], user)
+    },
   })
 
   const logout = useMutation({
     mutationFn: apiClient.logout,
     onSuccess: () => {
       queryClient.clear()
+    },
+  })
+
+  const refresh = useMutation({
+    mutationFn: apiClient.refreshToken,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] })
     },
   })
 
@@ -129,6 +168,7 @@ export function useAuth() {
     login,
     register,
     logout,
+    refresh,
     user: userQuery.data,
     isAuthenticated: !!userQuery.data && !userQuery.isError,
     isLoading: userQuery.isLoading
