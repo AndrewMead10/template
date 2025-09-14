@@ -23,7 +23,7 @@ class ResetConfirm(BaseModel):
     new_password: str
 
 
-@router.post("/auth/reset/request")
+@router.post("/auth/reset/onsubmit/request")
 async def request_password_reset(payload: ResetRequest):
     if not settings.enable_password_reset:
         raise HTTPException(status_code=403, detail="Password reset is disabled")
@@ -52,7 +52,7 @@ async def request_password_reset(payload: ResetRequest):
     return {"success": True, "message": "If an account exists, a reset email has been sent"}
 
 
-@router.post("/auth/reset/confirm")
+@router.post("/auth/reset/onsubmit/confirm")
 async def confirm_password_reset(payload: ResetConfirm):
     if len(payload.new_password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")

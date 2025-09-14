@@ -46,6 +46,9 @@ COPY backend/ ./backend
 WORKDIR /app/backend
 RUN uv sync
 
+# Run database migrations
+RUN uv run alembic upgrade head
+
 # Copy built frontend files into FastAPI static dir
 COPY --from=frontend-builder /app/frontend/dist ./app/static
 
