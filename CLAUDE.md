@@ -125,6 +125,45 @@ frontend/src/
 - **Cookie storage**: HttpOnly cookies for security
 - **Role-based access**: Hierarchical role system
 - **Password hashing**: bcrypt for secure password storage
+- **Automatic token refresh**: Frontend automatically refreshes expired access tokens
+
+#### Frontend Authentication Flow
+
+The frontend implements automatic token refresh using the `fetchWithAuth` function in `frontend/src/lib/api.ts`:
+
+```typescript
+// Enhanced fetch with automatic token refresh
+async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+  const response = await fetch(url, options)
+
+  // If we get a 401, try refreshing the token and retry once
+  if (response.status === 401 && url !== '/auth/refresh') {
+    try {
+      await fetch('/auth/refresh', { method: 'POST' })
+      // Retry the original request
+      return await fetch(url, options)
+    } catch (refreshError) {
+      // If refresh fails, redirect to login
+      window.location.href = '/auth/login'
+      throw new Error('Authentication failed')
+    }
+  }
+
+  return response
+}
+```
+
+**How it works:**
+1. Intercepts all API calls that return 401 (Unauthorized)
+2. Automatically calls the `/auth/refresh` endpoint to get a new access token
+3. Retries the original request with the new token
+4. If refresh fails, redirects user to login page
+
+**Usage guidelines:**
+- Use `fetchWithAuth()` for all authenticated API calls
+- Use regular `fetch()` only for public endpoints (login, register, etc.)
+- The refresh token is automatically included via HttpOnly cookies
+- Never call `/auth/refresh` directly from `fetchWithAuth` to prevent infinite loops
 
 ### Pages Pattern Benefits
 
@@ -210,6 +249,24 @@ R2_BUCKET=your-backup-bucket
 1. **Database changes**: Create Alembic migration
 2. **Backend logic**: Implement in appropriate page or function
 3. **Frontend UI**: Create components and integrate with API
+
+### Adding Authenticated API Endpoints
+
+When adding new authenticated endpoints:
+
+1. **Backend**: Create endpoints that require authentication using `get_current_user` dependency
+2. **Frontend**: Use `fetchWithAuth()` in your API client functions to ensure automatic token refresh
+3. **Example**:
+   ```typescript
+   // In frontend/src/lib/api.ts
+   async getProtectedData(): Promise<any> {
+     const response = await fetchWithAuth('/api/protected-endpoint')
+     if (!response.ok) {
+       throw new Error('Failed to fetch protected data')
+     }
+     return response.json()
+   }
+   ```
 
 ## Production Considerations
 
