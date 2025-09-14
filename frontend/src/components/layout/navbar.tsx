@@ -1,13 +1,21 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { LogOut, User } from 'lucide-react'
 
 export function Navbar() {
+  const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
 
-  const handleLogout = () => {
-    logout.mutate()
+  const handleLogout = async () => {
+    try {
+      await logout.mutateAsync()
+      navigate({ to: '/auth/login' })
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Still redirect even if logout API call fails
+      navigate({ to: '/auth/login' })
+    }
   }
 
   if (!isAuthenticated) {

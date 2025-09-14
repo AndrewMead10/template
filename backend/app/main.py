@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pathlib import Path
 import asyncio
 
@@ -35,9 +36,37 @@ app.include_router(me.router, prefix="/api")
 app.include_router(reset.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 
+class SPAStaticFiles(StaticFiles):
+    """Static files handler with SPA fallback to index.html.
+
+    If a static file is not found and the request accepts HTML, return index.html
+    so the client-side router can handle deep links like /auth/login.
+    """
+
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:  # type: ignore
+            if exc.status_code != 404:
+                raise
+
+            # Only fallback for GET/HEAD requests that accept HTML
+            method = scope.get("method", "GET")
+            accepts_html = False
+            for k, v in scope.get("headers", []):
+                if k == b"accept" and b"text/html" in v:
+                    accepts_html = True
+                    break
+
+            if method in ("GET", "HEAD") and accepts_html:
+                return await super().get_response("index.html", scope)
+
+            raise
+
+
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+    app.mount("/", SPAStaticFiles(directory=static_dir, html=True), name="static")
 
 
 @app.get("/livez")
