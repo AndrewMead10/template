@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -fsS http://localhost:5656/livez || exit 1
 
 # Run migrations and start application
-CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 5656"]
+CMD ["sh", "-c", "mkdir -p data && uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 5656"]
