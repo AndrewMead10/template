@@ -13,6 +13,7 @@ dependencies = [
     "sqlalchemy",
     "alembic",
     "pydantic",
+    "pydantic['email']",
     "pydantic-settings",
     "python-jose[cryptography]",
     "python-multipart",

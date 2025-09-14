@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     aws_secret_access_key: str = Field("", env="AWS_SECRET_ACCESS_KEY")
     aws_default_region: str = Field("us-east-1", env="AWS_DEFAULT_REGION")
     frontend_url: str = Field("http://localhost:8000", env="FRONTEND_URL")
-    
+
     # Always use .env in project root
     model_config = SettingsConfigDict(
         env_file=".env",
