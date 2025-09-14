@@ -49,7 +49,8 @@ const apiClient = {
       const error = await response.json()
       throw new Error(error.message || 'Login failed')
     }
-    return response.json()
+    const json = await response.json()
+    return json.user as User
   },
 
   async getCurrentUser(): Promise<User> {
@@ -60,7 +61,7 @@ const apiClient = {
     return response.json()
   },
 
-  async register(data: RegisterData): Promise<any> {
+  async register(data: RegisterData): Promise<User> {
     const response = await fetch('/api/auth/register/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +71,8 @@ const apiClient = {
       const error = await response.json()
       throw new Error(error.message || 'Registration failed')
     }
-    return response.json()
+    const json = await response.json()
+    return json.user as User
   },
 
   async logout(): Promise<void> {
@@ -137,9 +139,7 @@ export function useAuth() {
 
   const register = useMutation({
     mutationFn: apiClient.register,
-    onSuccess: (data) => {
-      // Extract user from the response (backend returns { success, message, user })
-      const user = data.user || data
+    onSuccess: (user) => {
       queryClient.setQueryData(['user'], user)
     },
   })

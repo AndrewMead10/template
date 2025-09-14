@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { usePageData } from '@/lib/api'
-import { Navbar } from '@/components/layout/navbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Activity, Clock } from 'lucide-react'
 import type { DashboardData } from '@/lib/types'
@@ -14,12 +13,9 @@ function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div>
-        <Navbar />
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="text-center">Loading...</div>
-          </div>
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="text-center">Loading...</div>
         </div>
       </div>
     )
@@ -27,13 +23,10 @@ function DashboardPage() {
 
   if (error) {
     return (
-      <div>
-        <Navbar />
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="text-center text-red-600">
-              Error loading dashboard: {(error as any)?.body?.message || 'Unknown error'}
-            </div>
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="text-center text-red-600">
+            Error loading dashboard: {(error as any)?.body?.message || 'Unknown error'}
           </div>
         </div>
       </div>
@@ -43,9 +36,7 @@ function DashboardPage() {
   const dashboardData = data as DashboardData
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
           
@@ -109,6 +100,5 @@ function DashboardPage() {
           </Card>
         </div>
       </div>
-    </div>
   )
 }

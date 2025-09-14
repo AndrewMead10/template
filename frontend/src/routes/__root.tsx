@@ -2,6 +2,7 @@ import { createRootRoute, Outlet, redirect } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { hasPermission, getRequiredRole } from '@/lib/utils'
 import { api } from '@/lib/api'
+import { Navbar } from '@/components/layout/navbar'
 import '@/styles/globals.css'
 
 const queryClient = new QueryClient({
@@ -45,6 +46,7 @@ function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background">
+        <Navbar />
         <Outlet />
       </div>
     </QueryClientProvider>
