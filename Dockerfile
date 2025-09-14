@@ -46,9 +46,6 @@ COPY backend/ ./backend
 WORKDIR /app/backend
 RUN uv sync
 
-# Run database migrations
-RUN uv run alembic upgrade head
-
 # Copy built frontend files into FastAPI static dir
 COPY --from=frontend-builder /app/frontend/dist ./app/static
 
@@ -62,5 +59,5 @@ EXPOSE 5656
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -fsS http://localhost:5656/livez || exit 1
 
-# Run application
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5656"]
+# Run migrations and start application
+CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 5656"]
