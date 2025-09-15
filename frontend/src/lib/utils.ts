@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { User } from "./api"
+import type { User } from "@/lib/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -17,7 +17,7 @@ export function hasPermission(user: User | null, requiredRole: string): boolean 
   if (!user || !user.roles) return false
 
   const requiredLevel = ROLE_HIERARCHY[requiredRole as keyof typeof ROLE_HIERARCHY] || 0
-  const userMaxLevel = Math.max(...user.roles.map(role =>
+  const userMaxLevel = Math.max(...user.roles.map((role: string) =>
     ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] || 0
   ))
 

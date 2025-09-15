@@ -1,10 +1,23 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { usePageData } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Activity, Clock } from 'lucide-react'
 import type { DashboardData } from '@/lib/types'
+import { api } from '@/lib/api'
+import { queryClient } from '@/routes/__root'
 
 export const Route = createFileRoute('/dashboard/')({
+  beforeLoad: async () => {
+    try {
+      await queryClient.ensureQueryData({
+        queryKey: ['user'],
+        queryFn: api.auth.getCurrentUser,
+      })
+      return {}
+    } catch {
+      throw redirect({ to: '/auth/login' })
+    }
+  },
   component: DashboardPage,
 })
 
@@ -26,7 +39,7 @@ function DashboardPage() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="text-center text-red-600">
-            Error loading dashboard: {(error as any)?.body?.message || 'Unknown error'}
+            Error loading dashboard: {String((error as any)?.message || 'Unknown error')}
           </div>
         </div>
       </div>

@@ -10,18 +10,14 @@ export const Route = createFileRoute('/auth/register/')({
   component: RegisterPage,
 })
 
-interface RegisterFormData extends RegisterData {
-  confirmPassword: string
-}
-
 function RegisterPage() {
   const navigate = useNavigate()
   const { register: registerUser } = useAuth()
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>()
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterData>()
   
   const password = watch('password')
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (data: RegisterData) => {
     try {
       await registerUser.mutateAsync({
         email: data.email,
@@ -94,7 +90,7 @@ function RegisterPage() {
             
             {registerUser.isError && (
               <p className="text-sm text-red-600">
-                {(registerUser.error as any)?.body?.message || 'Registration failed'}
+                {String((registerUser.error as any)?.message || 'Registration failed')}
               </p>
             )}
             

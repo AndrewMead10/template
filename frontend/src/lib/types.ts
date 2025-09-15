@@ -1,28 +1,27 @@
-export interface LoginData {
-  email: string
-  password: string
-}
+import type { components } from './openapi-types'
 
+export type LoginData = components['schemas']['LoginRequest']
+
+// Form shape (includes confirmPassword)
 export interface RegisterData {
   email: string
   password: string
   confirmPassword: string
 }
 
-export interface User {
-  id: number
-  email: string
-  is_active: boolean
-  roles: string[]
-  created_at?: string
-}
+// API payload shape for registration
+export type RegisterPayload = components['schemas']['RegisterRequest']
+
+export type User = components['schemas']['UserResponse'] & { created_at?: string }
 
 export interface ApiError {
-  message: string
-  code: string
+  detail?: string
+  message?: string
+  code?: string
 }
 
-export interface DashboardData {
+// Prefer generated type; intersect with precise shape to ensure strong typing
+export type DashboardData = components['schemas']['DashboardData'] & {
   user_stats: {
     user_id: number
     email: string

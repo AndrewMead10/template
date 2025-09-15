@@ -32,7 +32,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status_code,
         content={
-            "message": message,
+            "detail": message,
             "request_id": request_id,
             "status_code": status_code
         }

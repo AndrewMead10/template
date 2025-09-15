@@ -37,7 +37,10 @@ class Settings(BaseSettings):
     aws_access_key_id: str = Field("", env="AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = Field("", env="AWS_SECRET_ACCESS_KEY")
     aws_default_region: str = Field("us-east-1", env="AWS_DEFAULT_REGION")
-    frontend_url: str = Field("http://localhost:8000", env="FRONTEND_URL")
+    frontend_url: str = Field("http://localhost:3000", env="FRONTEND_URL")
+
+    # Cookies
+    cookie_secure: bool = Field(False, env="COOKIE_SECURE")
 
     # Always use .env in project root
     model_config = SettingsConfigDict(

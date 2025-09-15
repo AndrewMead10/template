@@ -160,10 +160,26 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 4. If refresh fails, redirects user to login page
 
 **Usage guidelines:**
-- Use `fetchWithAuth()` for all authenticated API calls
-- Use regular `fetch()` only for public endpoints (login, register, etc.)
-- The refresh token is automatically included via HttpOnly cookies
-- Never call `/auth/refresh` directly from `fetchWithAuth` to prevent infinite loops
+- Use `fetchWithAuth()` for authenticated API calls. It surfaces 401 errors without automatic refresh.
+- Use regular `fetch()` for public endpoints (login, register, reset request/confirm).
+- Protect routes individually by adding a `beforeLoad` that ensures the user is present; public routes omit it.
+- Example (protected route):
+  ```ts
+  // in routes/dashboard/index.tsx
+  export const Route = createFileRoute('/dashboard/')({
+    beforeLoad: async () => {
+      try {
+        await queryClient.ensureQueryData({
+          queryKey: ['user'],
+          queryFn: api.auth.getCurrentUser,
+        })
+      } catch {
+        throw redirect({ to: '/auth/login' })
+      }
+    },
+    component: DashboardPage,
+  })
+  ```
 
 ### Pages Pattern Benefits
 
@@ -183,16 +199,40 @@ async def dashboard_onload(current_user: User = Depends(get_current_user)):
     }
 ```
 
+### Form Submission Pattern
+
+- Use `/onsubmit` endpoints for all form submissions.
+- For pages with multiple distinct submit actions, either:
+  - Define multiple `/onsubmit/*` endpoints (recommended for clarity), or
+  - Include an `action` field in the payload and route server-side. The frontend helper can accept a full endpoint path.
+
+
 ### Observability
 
 - **Structured logging**: JSON-formatted logs with request correlation
 - **Health checks**: Liveness and readiness endpoints
+
+### Error Handling & Conventions
+
+- Always raise `HTTPException` with a meaningful `detail` string on errors. Avoid custom error shapes.
+- Global exception handler returns only `{ detail, request_id, status_code }` — no `message`.
+- Frontend should extract and display `detail` (then set `Error(message)` for UI).
+- Use toast notifications for user-facing errors/success (no `alert`). We use `sonner` for toasts.
+
+### Auth Refresh Strategy
+
+- Frontend `fetchWithAuth` implements a refresh lock so only one `/auth/refresh` runs at a time and other 401s wait, then retry once.
+- Tradeoffs:
+  - Pros: avoids duplicate refresh calls and race conditions.
+  - Cons: if refresh is slow, concurrent 401s wait behind a single promise, adding slight latency spikes under token expiry.
+- Given our page pattern (single `onload` and usually a single `onsubmit`), concurrent 401s are uncommon; the lock is primarily defensive and has negligible impact for typical usage.
 
 ### Security Features
 
 - **Input validation**: Pydantic models for request validation
 - **CORS configuration**: Configurable CORS settings
 - **Error handling**: Centralized error handling with request IDs
+- **Cookies**: HttpOnly cookies for tokens; `COOKIE_SECURE` controls `secure` flag (enable in production)
 
 ## Configuration
 
@@ -206,6 +246,8 @@ REFRESH_TOKEN_TTL_DAYS=30
 ENABLE_USER_REGISTRATION=true
 ENABLE_ADMIN_PANEL=true
 CORS_ORIGINS=["*"]      # Dev-friendly, restrict in production
+FRONTEND_URL=http://localhost:3000
+COOKIE_SECURE=false      # Set true in production (HTTPS)
 ```
 
 ## Database Management
@@ -243,6 +285,12 @@ R2_BUCKET=your-backup-bucket
 1. **Backend**: Create route in `backend/app/pages/`
 2. **Frontend**: Create page in `frontend/src/routes/`
 3. **API integration**: Add endpoints to `frontend/src/lib/api.ts`
+
+### Type Safety (OpenAPI)
+
+- Generate types from the running backend: `cd frontend && npm run gen:types` (fetches `http://localhost:5656/openapi.json`).
+- Import request/response types from `src/lib/openapi-types.ts` (e.g., `LoginRequest`, `UserResponse`).
+- Keep OpenAPI schemas precise (avoid `additionalProperties: true`). For page aggregates like dashboard, define explicit models on the backend so the spec is strongly typed.
 
 ### Adding New Features
 

@@ -65,7 +65,7 @@ function LoginPage() {
             
             {login.isError && (
               <p className="text-sm text-red-600">
-                {(login.error as any)?.body?.message || 'Login failed'}
+                {String((login.error as any)?.message || 'Login failed')}
               </p>
             )}
             

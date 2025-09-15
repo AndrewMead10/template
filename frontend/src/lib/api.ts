@@ -1,39 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { LoginData, RegisterPayload, User } from '@/lib/types'
 
-export interface LoginData {
-  email: string
-  password: string
-}
-
-export interface RegisterData {
-  email: string
-  password: string
-}
-
-export interface User {
-  id: number
-  email: string
-  is_active: boolean
-  roles: string[]
-}
-
-// Enhanced fetch with automatic token refresh
+// Simplified fetch with auth: no automatic refresh, surface 401
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
   const response = await fetch(url, options)
-
-  // If we get a 401, try refreshing the token and retry once
   if (response.status === 401 && url !== '/api/auth/refresh') {
-    try {
-      await fetch('/api/auth/refresh', { method: 'POST' })
-      // Retry the original request
-      return await fetch(url, options)
-    } catch (refreshError) {
-      // If refresh fails, redirect to login
-      window.location.href = '/auth/login'
-      throw new Error('Authentication failed')
-    }
+    const err: any = new Error('Not authenticated')
+    err.status = 401
+    throw err
   }
-
   return response
 }
 
@@ -47,7 +22,7 @@ const apiClient = {
     })
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.message || 'Login failed')
+      throw new Error(error.detail || error.message || 'Login failed')
     }
     const json = await response.json()
     return json.user as User
@@ -56,12 +31,14 @@ const apiClient = {
   async getCurrentUser(): Promise<User> {
     const response = await fetchWithAuth('/api/auth/me')
     if (!response.ok) {
-      throw new Error('Not authenticated')
+      const err: any = new Error('Not authenticated')
+      err.status = response.status
+      throw err
     }
     return response.json()
   },
 
-  async register(data: RegisterData): Promise<User> {
+  async register(data: RegisterPayload): Promise<User> {
     const response = await fetch('/api/auth/register/onsubmit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,7 +46,7 @@ const apiClient = {
     })
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.message || 'Registration failed')
+      throw new Error(error.detail || error.message || 'Registration failed')
     }
     const json = await response.json()
     return json.user as User
@@ -94,7 +71,7 @@ const apiClient = {
     })
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.message || 'Reset request failed')
+      throw new Error(error.detail || error.message || 'Reset request failed')
     }
   },
 
@@ -106,15 +83,15 @@ const apiClient = {
     })
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.message || 'Password reset failed')
+      throw new Error(error.detail || error.message || 'Password reset failed')
     }
   },
 
   async getPageData(page: string): Promise<any> {
     const response = await fetchWithAuth(`/api/${page}/onload`)
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || `Failed to load ${page} data`)
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || error.message || `Failed to load ${page} data`)
     }
     return response.json()
   }
@@ -123,7 +100,7 @@ const apiClient = {
 // Export the api object for use in route loaders
 export const api = {
   auth: apiClient,
-  getPageData: apiClient.getPageData
+  getPageData: apiClient.getPageData,
 }
 
 // Auth hooks

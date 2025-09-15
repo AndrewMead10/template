@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/auth/reset/')({
   component: ResetPage,
@@ -25,20 +26,22 @@ function ResetPage() {
   const onRequest = async (data: any) => {
     try {
       await api.auth.resetRequest(data.email)
-      alert('If an account exists, a reset email has been sent.')
+      toast.success('If an account exists, a reset email has been sent.')
       navigate({ to: '/auth/login' })
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      toast.error(err?.message || 'Failed to send reset email')
     }
   }
 
   const onConfirm = async (data: any) => {
     try {
       await api.auth.resetConfirm(token!, data.new_password)
-      alert('Password has been reset. Please sign in.')
+      toast.success('Password has been reset. Please sign in.')
       navigate({ to: '/auth/login' })
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      toast.error(err?.message || 'Failed to reset password')
     }
   }
 
@@ -106,4 +109,3 @@ function ResetPage() {
     </div>
   )
 }
-

@@ -1,11 +1,9 @@
-import { createRootRoute, Outlet, redirect } from '@tanstack/react-router'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { hasPermission, getRequiredRole } from '@/lib/utils'
-import { api } from '@/lib/api'
 import { Navbar } from '@/components/layout/navbar'
 import '@/styles/globals.css'
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
@@ -19,27 +17,6 @@ const queryClient = new QueryClient({
 
 export const Route = createRootRoute({
   component: RootLayout,
-  beforeLoad: async ({ location }) => {
-    try {
-      const user = await api.auth.getCurrentUser()
-      
-      if (!user && !location.pathname.startsWith('/auth')) {
-        throw redirect({ to: '/auth/login' })
-      }
-      
-      const requiredRole = getRequiredRole(location.pathname)
-      if (requiredRole && user && !hasPermission(user, requiredRole)) {
-        throw redirect({ to: '/dashboard' })
-      }
-      
-      return { user }
-    } catch (error: any) {
-      if (error?.status === 401 && !location.pathname.startsWith('/auth')) {
-        throw redirect({ to: '/auth/login' })
-      }
-      return { user: null }
-    }
-  }
 })
 
 function RootLayout() {

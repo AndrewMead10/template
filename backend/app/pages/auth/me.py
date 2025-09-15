@@ -11,6 +11,7 @@ class UserResponse(BaseModel):
     email: str
     is_active: bool
     roles: list[str]
+    created_at: str | None = None
 
 
 @router.get("/auth/me", response_model=UserResponse)
@@ -22,5 +23,6 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         id=current_user.id,
         email=current_user.email,
         is_active=current_user.is_active,
-        roles=roles
+        roles=roles,
+        created_at=current_user.created_at.isoformat() if getattr(current_user, "created_at", None) else None,
     )
