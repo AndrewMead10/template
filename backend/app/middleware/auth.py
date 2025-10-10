@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Request, Depends
+from fastapi import HTTPException, Request, Depends, Response
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -39,6 +39,35 @@ def create_refresh_token(user_id: int) -> str:
     expire = datetime.utcnow() + timedelta(days=settings.refresh_token_ttl_days)
     to_encode = {"sub": str(user_id), "exp": expire, "type": "refresh"}
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
+
+
+def set_auth_cookies(response: Response, user_id: int) -> None:
+    """Set auth cookies for the provided user"""
+    access_token = create_access_token(user_id)
+    refresh_token = create_refresh_token(user_id)
+
+    secure_cookie = bool(getattr(settings, "cookie_secure", False))
+    if not secure_cookie:
+        secure_cookie = settings.frontend_url.startswith("https://")
+
+    response.set_cookie(
+        "access_token",
+        access_token,
+        httponly=True,
+        max_age=settings.access_token_ttl_minutes * 60,
+        samesite="lax",
+        secure=secure_cookie,
+        path="/",
+    )
+    response.set_cookie(
+        "refresh_token",
+        refresh_token,
+        httponly=True,
+        max_age=settings.refresh_token_ttl_days * 24 * 60 * 60,
+        samesite="lax",
+        secure=secure_cookie,
+        path="/",
+    )
 
 
 def verify_token(token: str) -> bool:

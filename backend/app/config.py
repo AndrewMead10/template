@@ -41,6 +41,16 @@ class Settings(BaseSettings):
 
     # Cookies
     cookie_secure: bool = Field(False, env="COOKIE_SECURE")
+    
+    # Google OAuth
+    google_client_id: str = Field("", env="GOOGLE_CLIENT_ID")
+    google_client_secret: str = Field("", env="GOOGLE_CLIENT_SECRET")
+    google_redirect_uri: str = Field(
+        "http://localhost:8000/auth/google/callback", env="GOOGLE_REDIRECT_URI"
+    )
+    google_allowed_domains: list[str] = Field(
+        default_factory=list, env="GOOGLE_ALLOWED_DOMAINS"
+    )
 
     # Always use .env in project root
     model_config = SettingsConfigDict(

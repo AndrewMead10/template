@@ -8,20 +8,36 @@ import type { LoginData } from '@/lib/types'
 
 export const Route = createFileRoute('/auth/login/')({
   component: LoginPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
+  }),
 })
 
 function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
+  const { redirect } = Route.useSearch()
+  const targetPath = redirect ?? '/dashboard'
 
   const onSubmit = async (data: LoginData) => {
     try {
       await login.mutateAsync(data)
-      navigate({ to: '/dashboard' })
+      navigate({ to: targetPath as any })
     } catch (error) {
       console.error('Login failed:', error)
     }
+  }
+
+  const handleGoogleSignIn = () => {
+    const params = new URLSearchParams()
+    if (redirect) {
+      params.set('redirect', redirect)
+    }
+    const query = params.toString()
+    window.location.href = query
+      ? `/auth/google/login?${query}`
+      : '/auth/google/login'
   }
 
   return (
@@ -77,6 +93,27 @@ function LoginPage() {
               {login.isPending ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4 w-full"
+              onClick={handleGoogleSignIn}
+            >
+              Continue with Google
+            </Button>
+          </div>
           
           <div className="mt-4 text-center">
             <Link

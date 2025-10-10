@@ -7,7 +7,7 @@ import asyncio
 from .middleware.cors import setup_cors
 from .middleware.logging import log_requests
 from .middleware.errors import global_exception_handler
-from .pages.auth import login, register, refresh, logout, me, reset
+from .pages.auth import login, register, refresh, logout, me, reset, google
 from .pages import dashboard
 from .functions.backups import daily_backup_loop, cleanup_expired_tokens
 from .database import get_db_session
@@ -35,6 +35,8 @@ app.include_router(logout.router, prefix="/api")
 app.include_router(me.router, prefix="/api")
 app.include_router(reset.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(google.router, prefix="/api")
+
 
 class SPAStaticFiles(StaticFiles):
     """Static files handler with SPA fallback to index.html.
@@ -62,7 +64,6 @@ class SPAStaticFiles(StaticFiles):
                 return await super().get_response("index.html", scope)
 
             raise
-
 
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():

@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from .me import UserResponse as AuthUser
 from ...middleware.auth import (
     verify_password,
-    create_access_token,
-    create_refresh_token,
     get_user_roles_with_hierarchy,
+    set_auth_cookies,
 )
 from ...database.shared import get_user_by_email
-from ...config import settings
 
 router = APIRouter()
 
@@ -33,25 +31,7 @@ async def login_onsubmit(credentials: LoginRequest, response: Response):
     if not user.is_active:
         raise HTTPException(status_code=401, detail="Account is disabled")
     
-    access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id)
-    
-    response.set_cookie(
-        "access_token",
-        access_token,
-        httponly=True,
-        max_age=settings.access_token_ttl_minutes * 60,
-        samesite="lax",
-        secure=getattr(settings, "cookie_secure", False),
-    )
-    response.set_cookie(
-        "refresh_token", 
-        refresh_token,
-        httponly=True,
-        max_age=settings.refresh_token_ttl_days * 24 * 60 * 60,
-        samesite="lax",
-        secure=getattr(settings, "cookie_secure", False),
-    )
+    set_auth_cookies(response, user.id)
     
     roles = list(get_user_roles_with_hierarchy(user.id))
 

@@ -21,6 +21,7 @@ dependencies = [
     "structlog",
     "boto3",
     "aiofiles",
+    "httpx",
 ]
 [tool.ruff]
 line-length = 88

@@ -24,18 +24,12 @@ A comprehensive full-stack service template with FastAPI, React, and modern deve
 
 This template implements a modern full-stack application with:
 
-- **Backend**: FastAPI with SQLAlchemy, JWT authentication, and structured logging
-- **Frontend**: React with TypeScript, TanStack Router/Query, and Tailwind CSS
+- **Backend**: FastAPI with SQLAlchemy, JWT authentication, structured logging, and UV for dependency management 
+- **Frontend**: Vite, using React with TypeScript, TanStack Router/Query, ShadCN, Tailwind CSS
 - **Database**: SQLite with Alembic migrations
 - **Deployment**: Docker and Docker Compose ready
 
 ## Quick Start
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- Docker and Docker Compose (for containerized deployment)
 
 ### Development Setup
 
@@ -65,6 +59,7 @@ This template implements a modern full-stack application with:
    ```
 
 4. **Access the application**:
+The app in development will have a seperate frontend and backend running, but for deployments, we will build and server the frontend from the backend, allowing for a single container deployment.
    - Frontend: http://localhost:3000 (development)
    - Backend API: http://localhost:5656
    - API Docs: http://localhost:5656/docs
@@ -82,6 +77,18 @@ This template implements a modern full-stack application with:
    - Application: http://localhost:5656
    - API Docs: http://localhost:5656/docs
 
+### Updating Production Deployment
+
+For updating a running production deployment:
+
+```bash
+# Quick update (uses Docker cache)
+./update-deployment.sh
+
+# Full rebuild (no cache, slower but ensures clean build)
+./update-deployment.sh --full-rebuild
+```
+
 ## Architecture
 
 ### Backend Structure (Pages Pattern)
@@ -93,13 +100,28 @@ backend/app/
 ├── main.py                 # FastAPI app setup
 ├── config.py              # Configuration management
 ├── pages/                 # Page-specific business logic
-│   ├── auth/             # Authentication endpoints
+│   ├── auth/             # Authentication pages 
 │   ├── dashboard.py      # Dashboard data endpoints
-│   └── admin/           # Admin panel endpoints
+│   └── admin/           # Admin pages 
 ├── middleware/          # HTTP middleware
 ├── database/           # Models and database utilities
 └── functions/         # Shared business logic
 ```
+The backend pages should have an onLoad route, which will go and load all of the necessary data from the database and return it to the front end, so that for a given page's load, the backend only needs to be called once. 
+
+Then, ideally, a page will have a single onSubmit route, which handles all of the onSubmission logic for that page. Not every page will necessarily have a single on submit. They could potentially need more than one. So you can add more than one onSubmit for page if needed. Just make sure you call it onSubmit and then something descriptive so we know what it is for.
+
+Pages can have as many helper functions as are needed that are specific to that given page. If a function on a given page is used on other pages, then you should add it to a file in the functions folder.
+
+The functions folder is for functions that are shared across multiple pages or are complex pieces of logic that should not be included as a helper function on the pages file.
+
+We want to prevent the unnecessary spamming of functions if possible. Functions should only be made either on a page or in the functions file if they need to be reused across multiple other functions. If we end up having a code block that was previously only used in one spot, but is now in multiple spots, then we should break that out into its own function in the functions file to reuse across the different places that call it. If the function is reused twice on the same page but nowhere else, you can just add it as a helper function in that page file instead of needing to add it to the functions folder.
+
+One-off database queries can just be written directly in a page's onLoad or onSubmit. But if queries end up getting used across multiple places, then add them to a file in the database folder. We should not just have a single crud.py file in the databases folder for all of the database operations. Instead, they should be broken into logical pieces instead.
+
+Always be sure to check the existing functions and database files to see if the function or database query you are making could fit into one of those already instead of needing to make a new one. Once again, we are trying to reduce the amount of unnecessary object-oriented code where we just have functions and files displayed all over the place. We want to keep our code as close to the caller as possible.
+
+
 
 ### Frontend Structure
 
@@ -117,17 +139,11 @@ frontend/src/
 └── hooks/            # Custom React hooks
 ```
 
+Be sure to use shadcn components when possible, and use tailwind for styling. 
+
 ## Key Features
 
-### Authentication System
-
-- **JWT-based**: Access + refresh token pattern
-- **Cookie storage**: HttpOnly cookies for security
-- **Role-based access**: Hierarchical role system
-- **Password hashing**: bcrypt for secure password storage
-- **Automatic token refresh**: Frontend automatically refreshes expired access tokens
-
-#### Frontend Authentication Flow
+### Frontend Authentication Flow
 
 The frontend implements automatic token refresh using the `fetchWithAuth` function in `frontend/src/lib/api.ts`:
 
@@ -181,37 +197,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   })
   ```
 
-### Pages Pattern Benefits
-
-- **Intuitive routing**: Backend routes mirror frontend pages
-- **Reduced API calls**: `onLoad` endpoints aggregate page data
-- **Clear organization**: Easy to find logic for any page
-- **Consistent patterns**: Every page follows onLoad/onSubmit structure
-
-Example page implementation:
-```python
-@router.get("/dashboard/onload")
-async def dashboard_onload(current_user: User = Depends(get_current_user)):
-    # Aggregate all dashboard data in one request
-    return {
-        "user_stats": get_user_stats(current_user.id),
-        "system_metrics": get_system_metrics()
-    }
-```
-
-### Form Submission Pattern
-
-- Use `/onsubmit` endpoints for all form submissions.
-- For pages with multiple distinct submit actions, either:
-  - Define multiple `/onsubmit/*` endpoints (recommended for clarity), or
-  - Include an `action` field in the payload and route server-side. The frontend helper can accept a full endpoint path.
-
-
-### Observability
-
-- **Structured logging**: JSON-formatted logs with request correlation
-- **Health checks**: Liveness and readiness endpoints
-
 ### Error Handling & Conventions
 
 - Always raise `HTTPException` with a meaningful `detail` string on errors. Avoid custom error shapes.
@@ -227,12 +212,6 @@ async def dashboard_onload(current_user: User = Depends(get_current_user)):
   - Cons: if refresh is slow, concurrent 401s wait behind a single promise, adding slight latency spikes under token expiry.
 - Given our page pattern (single `onload` and usually a single `onsubmit`), concurrent 401s are uncommon; the lock is primarily defensive and has negligible impact for typical usage.
 
-### Security Features
-
-- **Input validation**: Pydantic models for request validation
-- **CORS configuration**: Configurable CORS settings
-- **Error handling**: Centralized error handling with request IDs
-- **Cookies**: HttpOnly cookies for tokens; `COOKIE_SECURE` controls `secure` flag (enable in production)
 
 ## Configuration
 
@@ -248,23 +227,22 @@ ENABLE_ADMIN_PANEL=true
 CORS_ORIGINS=["*"]      # Dev-friendly, restrict in production
 FRONTEND_URL=http://localhost:3000
 COOKIE_SECURE=false      # Set true in production (HTTPS)
+GOOGLE_CLIENT_ID=       # Required for Google OAuth
+GOOGLE_CLIENT_SECRET=   # Required for Google OAuth
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+GOOGLE_ALLOWED_DOMAINS=[]  # Optional allowlist, e.g. ["example.com"]
 ```
+
+### Google OAuth Setup
+
+- Backend exposes `/auth/google/login` (redirect to Google) and `/auth/google/callback` (exchanges code, signs the user in, and redirects to the frontend).
+- Users signing in with Google are created automatically if they don't already exist; they receive randomly generated passwords and rely on Google for authentication.
+- Configure the Google credentials (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`) in `.env` and in Google Cloud Console. Restrict access with `GOOGLE_ALLOWED_DOMAINS` (JSON array such as `["example.com"]`) if required.
+- The frontend login page now includes a **Continue with Google** button. It honors an optional `?redirect=/path` query string and forwards that path through the OAuth flow.
 
 ## Database Management
 
-### Migrations with Alembic
-
-```bash
-# Create new migration
-cd backend
-uv run alembic revision --autogenerate -m "description"
-
-# Apply migrations
-uv run alembic upgrade head
-
-# View migration history
-uv run alembic history
-```
+Migrations are done with alebic.
 
 ### Backup System
 
@@ -277,26 +255,15 @@ ENABLE_R2_BACKUP=true
 R2_ACCOUNT_ID=your-account-id
 R2_BUCKET=your-backup-bucket
 ```
+By default this will be off.
 
 ## Development Workflow
-
-### Adding New Pages
-
-1. **Backend**: Create route in `backend/app/pages/`
-2. **Frontend**: Create page in `frontend/src/routes/`
-3. **API integration**: Add endpoints to `frontend/src/lib/api.ts`
 
 ### Type Safety (OpenAPI)
 
 - Generate types from the running backend: `cd frontend && npm run gen:types` (fetches `http://localhost:5656/openapi.json`).
 - Import request/response types from `src/lib/openapi-types.ts` (e.g., `LoginRequest`, `UserResponse`).
 - Keep OpenAPI schemas precise (avoid `additionalProperties: true`). For page aggregates like dashboard, define explicit models on the backend so the spec is strongly typed.
-
-### Adding New Features
-
-1. **Database changes**: Create Alembic migration
-2. **Backend logic**: Implement in appropriate page or function
-3. **Frontend UI**: Create components and integrate with API
 
 ### Adding Authenticated API Endpoints
 
@@ -316,82 +283,4 @@ When adding new authenticated endpoints:
    }
    ```
 
-## Production Considerations
-
-### Security Checklist
-
-- [ ] Change JWT_SECRET from default
-- [ ] Configure CORS_ORIGINS for your domain
-- [ ] Review enabled features (registration, admin panel)
-- [ ] Configure HTTPS termination (reverse proxy)
-
-
-### Scaling Considerations
-
-- **Database**: Consider PostgreSQL for larger deployments
-- **Caching**: Add Redis for session storage and caching
-- **Load balancing**: Use reverse proxy for multiple instances
-
-## Customization Guide
-
-### Adding Authentication Providers
-
-The template uses JWT but can be extended:
-
-1. Add provider-specific endpoints in `pages/auth/`
-2. Extend user model with provider fields
-3. Update frontend login components
-
-### Extending the Admin Panel
-
-Add new admin features by:
-
-1. Creating routes in `pages/admin/`
-2. Adding role checks with `require_role("admin")`
-3. Building frontend admin components
-
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database locked**: Ensure only one process accesses SQLite
-2. **CORS errors**: Check CORS_ORIGINS configuration
-3. **Token refresh fails**: Verify JWT_SECRET consistency
-4. **Frontend build fails**: Check Node.js version (18+ required)
-
-### Development Tips
-
-- **Backend logs**: Use structured logging for debugging
-- **Frontend debugging**: Use React DevTools and TanStack Router DevTools
-- **API testing**: Use the automatic OpenAPI docs at `/docs`
-
----
-
 > **Note for AI Assistants**: If you identify functionality or patterns not covered in this documentation, please update this CLAUDE.md file with the new information to help future development and maintenance.
-
-## File Structure Reference
-
-```
-template/
-├── backend/                # FastAPI backend
-│   ├── app/
-│   │   ├── main.py        # Application entry point
-│   │   ├── config.py      # Configuration management
-│   │   ├── pages/         # Page-specific routes
-│   │   ├── middleware/    # HTTP middleware
-│   │   ├── database/      # Models and database utilities
-│   │   └── functions/     # Shared business logic
-│   ├── alembic/          # Database migrations
-│   └── pyproject.toml    # Python dependencies
-├── frontend/             # React frontend
-│   ├── src/
-│   │   ├── routes/       # TanStack Router pages
-│   │   ├── components/   # Reusable UI components
-│   │   ├── lib/         # API client and utilities
-│   │   └── hooks/       # Custom React hooks
-│   └── package.json     # Node.js dependencies
-├── data/                # Persistent data (SQLite, backups)
-├── docker-compose.yml   # Container orchestration
-└── Dockerfile          # Container build instructions
-```
