@@ -1,14 +1,43 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { LoginData, RegisterPayload, User } from '@/lib/types'
 
-// Simplified fetch with auth: no automatic refresh, surface 401
+// Refresh lock to prevent concurrent refresh requests
+let refreshPromise: Promise<void> | null = null
+
+// Enhanced fetch with automatic token refresh
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
   const response = await fetch(url, options)
+
+  // If we get a 401, try refreshing the token and retry once
   if (response.status === 401 && url !== '/api/auth/refresh') {
-    const err: any = new Error('Not authenticated')
-    err.status = 401
-    throw err
+    try {
+      // If a refresh is already in progress, wait for it
+      if (refreshPromise) {
+        await refreshPromise
+      } else {
+        // Start a new refresh
+        refreshPromise = fetch('/api/auth/refresh', { method: 'POST' })
+          .then(refreshResponse => {
+            if (!refreshResponse.ok) {
+              throw new Error('Refresh failed')
+            }
+          })
+          .finally(() => {
+            refreshPromise = null
+          })
+
+        await refreshPromise
+      }
+
+      // Retry the original request with the new access token
+      return await fetch(url, options)
+    } catch (refreshError) {
+      // If refresh fails, redirect to login
+      window.location.href = '/auth/login'
+      throw new Error('Authentication failed')
+    }
   }
+
   return response
 }
 

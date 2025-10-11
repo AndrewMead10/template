@@ -33,32 +33,9 @@ This template implements a modern full-stack application with:
 
 ### Development Setup
 
-1. **Clone and setup**:
-   ```bash
-   cd template
-   cp .env.example .env
-   # Edit .env with your JWT_SECRET and other configuration
-   ```
+The DB is in data/service.db
 
-2. **Backend setup**:
-   ```bash
-   cd backend
-   pip install uv
-   uv sync
-   # Initialize database
-   uv run alembic upgrade head
-   # Start backend
-   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 5656
-   ```
-
-3. **Frontend setup** (in a new terminal):
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-4. **Access the application**:
+1. **Access the application**:
 The app in development will have a seperate frontend and backend running, but for deployments, we will build and server the frontend from the backend, allowing for a single container deployment.
    - Frontend: http://localhost:3000 (development)
    - Backend API: http://localhost:5656
@@ -113,6 +90,8 @@ Then, ideally, a page will have a single onSubmit route, which handles all of th
 
 Pages can have as many helper functions as are needed that are specific to that given page. If a function on a given page is used on other pages, then you should add it to a file in the functions folder.
 
+A single page should be a single file, where the onload, onsubmit(s) and any other functions all reside. you shouldnt need to make multiple files for a single page. you can group file pages into a folder if it makes logical sense (like all admin pages go in the admin folder).
+
 The functions folder is for functions that are shared across multiple pages or are complex pieces of logic that should not be included as a helper function on the pages file.
 
 We want to prevent the unnecessary spamming of functions if possible. Functions should only be made either on a page or in the functions file if they need to be reused across multiple other functions. If we end up having a code block that was previously only used in one spot, but is now in multiple spots, then we should break that out into its own function in the functions file to reuse across the different places that call it. If the function is reused twice on the same page but nowhere else, you can just add it as a helper function in that page file instead of needing to add it to the functions folder.
@@ -120,8 +99,6 @@ We want to prevent the unnecessary spamming of functions if possible. Functions 
 One-off database queries can just be written directly in a page's onLoad or onSubmit. But if queries end up getting used across multiple places, then add them to a file in the database folder. We should not just have a single crud.py file in the databases folder for all of the database operations. Instead, they should be broken into logical pieces instead.
 
 Always be sure to check the existing functions and database files to see if the function or database query you are making could fit into one of those already instead of needing to make a new one. Once again, we are trying to reduce the amount of unnecessary object-oriented code where we just have functions and files displayed all over the place. We want to keep our code as close to the caller as possible.
-
-
 
 ### Frontend Structure
 

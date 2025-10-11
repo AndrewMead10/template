@@ -5,9 +5,8 @@ from pathlib import Path
 import asyncio
 
 from .middleware.cors import setup_cors
-from .middleware.logging import log_requests
 from .middleware.errors import global_exception_handler
-from .pages.auth import login, register, refresh, logout, me, reset, google
+from .pages.auth import login, register, logout, reset, google, utils
 from .pages import dashboard
 from .functions.backups import daily_backup_loop, cleanup_expired_tokens
 from .database import get_db_session
@@ -21,8 +20,6 @@ app = FastAPI(
 
 setup_cors(app)
 
-app.middleware("http")(log_requests)
-
 app.add_exception_handler(Exception, global_exception_handler)
 
 # Mount all API routes under a common /api prefix to avoid
@@ -30,9 +27,8 @@ app.add_exception_handler(Exception, global_exception_handler)
 # running the frontend dev server or refreshing deep links.
 app.include_router(login.router, prefix="/api")
 app.include_router(register.router, prefix="/api")
-app.include_router(refresh.router, prefix="/api")
+app.include_router(utils.router, prefix="/api")
 app.include_router(logout.router, prefix="/api")
-app.include_router(me.router, prefix="/api")
 app.include_router(reset.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(google.router, prefix="/api")

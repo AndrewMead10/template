@@ -37,9 +37,8 @@ class EmailService:
         subject = "Password Reset Request"
         html_body = self._build_reset_html(reset_url)
 
-        # In non-configured environments, log and succeed to avoid blocking dev
+        # In non-configured environments, succeed to avoid blocking dev
         if not self._enabled or self._client is None:
-            print(f"[email] Dev mode: would send password reset to {to_email}: {reset_url}")
             return True
 
         try:
@@ -53,7 +52,6 @@ class EmailService:
             )
             return True
         except ClientError as e:  # pragma: no cover
-            print(f"Email sending failed: {e}")
             return False
 
 

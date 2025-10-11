@@ -11,10 +11,7 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = Field("sqlite:///./data/service.db", env="DATABASE_URL")
-    
-    # Logging
-    log_level: str = Field("INFO", env="LOG_LEVEL")
-    
+
     # CORS
     cors_origins: list[str] = Field(["*"], env="CORS_ORIGINS")
     cors_allow_credentials: bool = Field(True, env="CORS_ALLOW_CREDENTIALS")

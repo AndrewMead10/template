@@ -18,7 +18,6 @@ dependencies = [
     "python-jose[cryptography]",
     "python-multipart",
     "passlib[bcrypt]",
-    "structlog",
     "boto3",
     "aiofiles",
     "httpx",
