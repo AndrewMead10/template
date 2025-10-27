@@ -79,3 +79,6 @@ data/
 # Monitoring data
 monitoring/grafana/data/
 monitoring/prometheus/data/
+
+
+settings.local.json

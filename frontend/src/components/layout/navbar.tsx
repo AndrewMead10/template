@@ -10,11 +10,11 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       await logout.mutateAsync()
-      navigate({ to: '/auth/login' })
+      navigate({ to: '/auth/login', search: { redirect: undefined } })
     } catch (error) {
       console.error('Logout failed:', error)
       // Still redirect even if logout API call fails
-      navigate({ to: '/auth/login' })
+      navigate({ to: '/auth/login', search: { redirect: undefined } })
     }
   }
 
@@ -64,7 +64,7 @@ export function Navbar() {
                 size="sm"
                 asChild
               >
-                <Link to="/auth/login">
+                <Link to="/auth/login" search={{ redirect: undefined }}>
                   Log In
                 </Link>
               </Button>

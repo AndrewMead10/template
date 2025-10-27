@@ -259,6 +259,28 @@ By default this will be off.
 
 ## Development Workflow
 
+### Feature Development Process
+
+**IMPORTANT: Before implementing any new feature or fixing any bug, ALWAYS follow this process:**
+
+1. **Ask clarifying questions** - Understand the full context and requirements:
+   - What is the exact problem or feature request?
+   - What is the desired behavior or outcome?
+   - Are there any specific constraints or preferences?
+   - What is the expected user experience?
+
+2. **Diagnose and design first** - Do not jump straight into coding:
+   - For bugs: Investigate and understand the root cause before proposing a fix
+   - For features: Design the approach, considering both frontend and backend implications
+   - Identify which files and components will be affected
+   - Consider how the change fits into the existing architecture
+
+3. **Get approval** - Present your understanding and approach to the user before coding
+
+4. **Implement** - Only after steps 1-3 are complete, begin writing code
+
+This process prevents misunderstandings, reduces rework, and ensures the implementation aligns with user expectations.
+
 ### Type Safety (OpenAPI)
 
 - Generate types from the running backend: `cd frontend && npm run gen:types` (fetches `http://localhost:5656/openapi.json`).

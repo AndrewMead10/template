@@ -32,8 +32,10 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
       // Retry the original request with the new access token
       return await fetch(url, options)
     } catch (refreshError) {
-      // If refresh fails, redirect to login
-      window.location.href = '/auth/login'
+      // If refresh fails, redirect to login (but not if we're already on an auth page)
+      if (!window.location.pathname.startsWith('/auth/')) {
+        window.location.href = '/auth/login'
+      }
       throw new Error('Authentication failed')
     }
   }
