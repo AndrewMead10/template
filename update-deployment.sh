@@ -66,13 +66,6 @@ sudo systemctl start "$SERVICE_NAME"
 echo "Checking service status..."
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "✅ Service is running successfully!"
-    
-    # Check if the API is responding
-    if curl -s -f http://192.168.0.119:${SERVICE_PORT}/ > /dev/null; then
-        echo "✅ API is responding at http://192.168.0.119:${SERVICE_PORT}"
-    else
-        echo "⚠️  Service is running but API may not be ready yet"
-    fi
 else
     echo "❌ Service failed to start"
     echo "Check service logs with: sudo systemctl status $SERVICE_NAME"

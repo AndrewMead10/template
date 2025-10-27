@@ -134,6 +134,9 @@ export const api = {
   getPageData: apiClient.getPageData,
 }
 
+// Export fetchWithAuth for direct use
+export { fetchWithAuth }
+
 // Auth hooks
 export function useAuth() {
   const queryClient = useQueryClient()

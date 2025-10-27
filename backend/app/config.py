@@ -49,6 +49,11 @@ class Settings(BaseSettings):
         default_factory=list, env="GOOGLE_ALLOWED_DOMAINS"
     )
 
+    # OpenAI/OpenRouter Configuration
+    openai_api_key: str = Field("", env="OPENAI_API_KEY")
+    openai_base_url: str = Field("https://openrouter.ai/api/v1", env="OPENAI_BASE_URL")
+    openai_model: str = Field("anthropic/claude-3.5-sonnet", env="OPENAI_MODEL")
+
     # Always use .env in project root
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -24,7 +24,8 @@ RUN npm install
 COPY frontend/ ./
 # Copy OpenAPI spec generated from backend source and generate TS types
 COPY --from=backend-openapi /app/backend/openapi.json /app/frontend/openapi.json
-RUN npm run gen:types
+# Use the local openapi.json file instead of fetching from localhost
+RUN npx openapi-typescript ./openapi.json -o src/lib/openapi-types.ts
 RUN npm run build
 
 ###############################

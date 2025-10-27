@@ -21,6 +21,7 @@ dependencies = [
     "boto3",
     "aiofiles",
     "httpx",
+    "openai>=2.6.1",
 ]
 [tool.ruff]
 line-length = 88

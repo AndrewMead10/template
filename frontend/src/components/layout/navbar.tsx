@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, MessageSquare } from 'lucide-react'
 
 export function Navbar() {
   const navigate = useNavigate()
@@ -38,6 +38,14 @@ export function Navbar() {
                 className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Dashboard
+              </Link>
+
+              <Link
+                to="/chat"
+                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Chat
               </Link>
 
               <div className="flex items-center space-x-2">

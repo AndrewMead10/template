@@ -24,9 +24,10 @@ A comprehensive full-stack service template with FastAPI, React, and modern deve
 
 This template implements a modern full-stack application with:
 
-- **Backend**: FastAPI with SQLAlchemy, JWT authentication, structured logging, and UV for dependency management 
+- **Backend**: FastAPI with SQLAlchemy, JWT authentication, structured logging, and UV for dependency management
 - **Frontend**: Vite, using React with TypeScript, TanStack Router/Query, ShadCN, Tailwind CSS
 - **Database**: SQLite with Alembic migrations
+- **Chatbot**: Full-featured AI chatbot with streaming, markdown/LaTeX rendering, and conversation management
 - **Deployment**: Docker and Docker Compose ready
 
 ## Quick Start
@@ -37,7 +38,9 @@ This template implements a modern full-stack application with:
    ```bash
    cd template
    cp .env.example .env
-   # Edit .env with your JWT_SECRET and other configuration
+   # Edit .env with your JWT_SECRET, OPENAI_API_KEY, and other configuration
+   # IMPORTANT: The root .env file is required for Docker deployments
+   # For local development, backend/.env is also used
    ```
 
 2. **Backend setup**:
@@ -139,7 +142,26 @@ frontend/src/
 └── hooks/            # Custom React hooks
 ```
 
-Be sure to use shadcn components when possible, and use tailwind for styling. 
+Be sure to use shadcn components when possible, and use tailwind for styling.
+
+## Environment Configuration
+
+This project uses TWO `.env` files:
+
+1. **Root `.env`** (`/template/.env`):
+   - Required for Docker/Docker Compose deployments
+   - Used by `docker-compose.yml` to pass environment variables to containers
+   - Must contain all configuration including `OPENAI_API_KEY`
+
+2. **Backend `.env`** (`/template/backend/.env`):
+   - Used for local development when running `uv run uvicorn` directly
+   - Should mirror the root `.env` configuration
+   - Loaded by `backend/app/config.py` via Pydantic settings
+
+**IMPORTANT**: When adding new environment variables:
+- Add them to `.env.example` (template for users)
+- Add them to both root `.env` and `backend/.env` for your local setup
+- Add them to `docker-compose.yml` environment section if needed for Docker deployments
 
 ## Key Features
 
@@ -239,6 +261,42 @@ GOOGLE_ALLOWED_DOMAINS=[]  # Optional allowlist, e.g. ["example.com"]
 - Users signing in with Google are created automatically if they don't already exist; they receive randomly generated passwords and rely on Google for authentication.
 - Configure the Google credentials (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`) in `.env` and in Google Cloud Console. Restrict access with `GOOGLE_ALLOWED_DOMAINS` (JSON array such as `["example.com"]`) if required.
 - The frontend login page now includes a **Continue with Google** button. It honors an optional `?redirect=/path` query string and forwards that path through the OAuth flow.
+
+### Chatbot Configuration
+
+The template includes a full-featured chatbot powered by OpenAI-compatible APIs:
+
+```python
+# OpenAI/OpenRouter Configuration
+OPENAI_API_KEY=your-api-key-here
+OPENAI_BASE_URL=https://openrouter.ai/api/v1  # Default: OpenRouter
+OPENAI_MODEL=anthropic/claude-3.5-sonnet       # Any OpenAI-compatible model
+```
+
+**Features:**
+- Message streaming with token-by-token display
+- Persistent conversation history per user
+- Markdown rendering with code syntax highlighting
+- LaTeX math equation support
+- Sidebar with conversation management (create, rename, delete)
+- Accessible at `/chat` for authenticated users
+
+**Database Models:**
+- `conversations` table: stores conversation metadata (id, user_id, title, timestamps)
+- `messages` table: stores all messages (id, conversation_id, role, content, timestamp)
+
+**Backend Endpoints:**
+- `GET /api/chat/onload?conversation_id={id}` - Load conversations and messages
+- `POST /api/chat/send` - Send message and stream response (SSE)
+- `POST /api/chat/new` - Create new conversation
+- `POST /api/chat/update` - Rename conversation
+- `POST /api/chat/delete` - Delete conversation and messages
+
+**Implementation Details:**
+- Uses OpenAI Python library with configurable base URL for compatibility with OpenRouter, Anthropic, or OpenAI
+- Server-Sent Events (SSE) for streaming responses
+- Frontend components: `ChatMessage`, `ChatSidebar` in `src/components/chat/`
+- Full markdown support via `react-markdown` with `remark-gfm`, `remark-math`, `rehype-katex`, `rehype-highlight`
 
 ## Database Management
 

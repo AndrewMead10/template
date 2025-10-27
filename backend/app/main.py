@@ -7,7 +7,7 @@ import asyncio
 from .middleware.cors import setup_cors
 from .middleware.errors import global_exception_handler
 from .pages.auth import login, register, logout, reset, google, utils
-from .pages import dashboard
+from .pages import dashboard, chat
 from .functions.backups import daily_backup_loop, cleanup_expired_tokens
 from .database import get_db_session
 from .config import settings
@@ -32,6 +32,7 @@ app.include_router(logout.router, prefix="/api")
 app.include_router(reset.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(google.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
 
 
 class SPAStaticFiles(StaticFiles):
