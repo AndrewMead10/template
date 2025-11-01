@@ -35,6 +35,14 @@ This template implements a modern full-stack application with:
 
 The DB is in data/service.db
 
+**Port Configuration**: When setting up a new project, generate a random port above 10,000 (e.g. 12846, 19735, 16862) to avoid conflicts with other applications. Update the port in these specific locations:
+- `run.sh:33` - Backend uvicorn command
+- `frontend/vite.config.ts:14` - Frontend port and `:17` - Backend proxy
+- `frontend/package.json:9` - OpenAPI type generation
+- `docker-compose.yml:7` - Docker port mapping
+- `Dockerfile:56,60,63` - Docker EXPOSE, healthcheck, and CMD
+- Documentation files referencing the ports
+
 1. **Access the application**:
 The app in development will have a seperate frontend and backend running, but for deployments, we will build and server the frontend from the backend, allowing for a single container deployment.
    - Frontend: http://localhost:3000 (development)
@@ -255,6 +263,8 @@ By default this will be off.
 3. **Get approval** - Present your understanding and approach to the user before coding
 
 4. **Implement** - Only after steps 1-3 are complete, begin writing code
+
+5. **Verify frontend builds** - After making any frontend changes, run `npm run build` in the frontend directory to ensure the changes build successfully before completing the task
 
 This process prevents misunderstandings, reduces rework, and ensures the implementation aligns with user expectations.
 
