@@ -39,6 +39,8 @@ This template implements a modern full-stack application with:
 - `frontend/package.json:9` - OpenAPI type generation
 - `docker-compose.yml:7` - Docker port mapping
 - `Dockerfile:56,60,63` - Docker EXPOSE, healthcheck, and CMD
+- `setup-service.sh:11` - Service port for API health checks
+- `update-deployment.sh:11,71` - Service port for deployment scripts
 - Documentation files referencing the ports
 
 1. **Clone and setup**:
@@ -85,17 +87,33 @@ The app in development will have a seperate frontend and backend running, but fo
    - Application: http://localhost:5656
    - API Docs: http://localhost:5656/docs
 
-### Updating Production Deployment
+### Production Deployment with Systemd Service
 
-For updating a running production deployment:
+For production deployment with automatic service management:
 
-```bash
-# Quick update (uses Docker cache)
-./update-deployment.sh
+1. **Setup the service** (run once):
+   ```bash
+   cp .env.example .env
+   # Edit .env with production values and update service name in setup-service.sh:10
+   sudo ./setup-service.sh
+   ```
 
-# Full rebuild (no cache, slower but ensures clean build)
-./update-deployment.sh --full-rebuild
-```
+2. **Update the service** (run after code changes):
+   ```bash
+   # Quick update (uses Docker cache)
+   ./update-deployment.sh
+
+   # Full rebuild (no cache, slower but ensures clean build)
+   ./update-deployment.sh --full-rebuild
+   ```
+
+**Service Management:**
+- Check status: `sudo systemctl status your-service`
+- View logs: `sudo journalctl -u your-service -f`
+- Stop service: `sudo systemctl stop your-service`
+- Start service: `sudo systemctl start your-service`
+
+*Note: Replace "your-service" with your actual service name in `setup-service.sh:10`*
 
 ## Architecture
 
