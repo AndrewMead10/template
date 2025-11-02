@@ -30,7 +30,7 @@ function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -44,7 +44,7 @@ function RegisterPage() {
               <Input
                 type="email"
                 placeholder="Email"
-                {...register('email', { 
+                {...register('email', {
                   required: 'Email is required',
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -53,15 +53,15 @@ function RegisterPage() {
                 })}
               />
               {errors.email && (
-                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
               )}
             </div>
-            
+
             <div>
               <Input
                 type="password"
                 placeholder="Password"
-                {...register('password', { 
+                {...register('password', {
                   required: 'Password is required',
                   minLength: {
                     value: 8,
@@ -70,10 +70,10 @@ function RegisterPage() {
                 })}
               />
               {errors.password && (
-                <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+                <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
               )}
             </div>
-            
+
             <div>
               <Input
                 type="password"
@@ -84,36 +84,36 @@ function RegisterPage() {
                 })}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive mt-1">{errors.confirmPassword.message}</p>
               )}
             </div>
-            
+
             {registerUser.isError && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-destructive">
                 {String((registerUser.error as any)?.message || 'Registration failed')}
               </p>
             )}
-            
+
             {registerUser.isSuccess && (
               <p className="text-sm text-green-600">
                 Account created successfully! Redirecting...
               </p>
             )}
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full"
               disabled={registerUser.isPending}
             >
               {registerUser.isPending ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <Link
               to="/auth/login"
               search={{ redirect: undefined }}
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-sm text-primary hover:text-primary/80"
             >
               Already have an account? Sign in
             </Link>

@@ -165,7 +165,32 @@ frontend/src/
 └── hooks/            # Custom React hooks
 ```
 
-Be sure to use shadcn components when possible, and use tailwind for styling. 
+Be sure to use shadcn components when possible, and use tailwind for styling.
+
+## Dark Mode Support
+
+The frontend includes comprehensive dark mode support powered by `next-themes` and Tailwind CSS:
+
+### Features:
+- **System Preference Detection**: Automatically follows user's OS theme preference
+- **Manual Toggle**: Sun/moon toggle button in the navigation bar
+- **Theme Persistence**: User's theme choice is saved and restored across sessions
+- **Smooth Transitions**: Seamless theme switching with no jarring transitions
+- **Full Component Support**: All ShadCN components include dark mode variants
+
+### Usage:
+- **For Users**: Click the sun/moon icon in the top navigation bar to toggle between light, dark, and system themes
+- **For Developers**:
+  - Use semantic color tokens: `bg-background`, `text-foreground`, `text-muted-foreground`, etc.
+  - Add dark mode variants with `dark:` prefix: `className="bg-white dark:bg-gray-900"`
+  - All ShadCN components automatically support dark mode
+  - The theme state is managed through `useTheme()` hook from `next-themes`
+
+### Implementation Details:
+- **Theme Provider**: Wrapped in `/frontend/src/routes/__root.tsx`
+- **Toggle Component**: Located at `/frontend/src/components/ui/theme-toggle.tsx`
+- **CSS Variables**: Complete color system defined in `/frontend/src/styles/globals.css`
+- **Tailwind Config**: Uses custom dark variant with CSS class-based approach
 
 ## Key Features
 

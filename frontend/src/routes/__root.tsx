@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Navbar } from '@/components/layout/navbar'
+import { ThemeProvider } from '@/components/theme-provider'
 import '@/styles/globals.css'
 
 export const queryClient = new QueryClient({
@@ -22,10 +23,17 @@ export const Route = createRootRoute({
 function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <Outlet />
-      </div>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <Outlet />
+        </div>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

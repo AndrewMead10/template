@@ -46,7 +46,7 @@ function ResetPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Password Reset</CardTitle>
@@ -64,7 +64,7 @@ function ResetPage() {
                   {...register('email', { required: 'Email is required' })}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600 mt-1">{String(errors.email.message)}</p>
+                  <p className="text-sm text-destructive mt-1">{String(errors.email.message)}</p>
                 )}
               </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -80,7 +80,7 @@ function ResetPage() {
                   {...register('new_password', { required: 'Password is required', minLength: { value: 8, message: 'Min length 8' } })}
                 />
                 {errors.new_password && (
-                  <p className="text-sm text-red-600 mt-1">{String(errors.new_password.message)}</p>
+                  <p className="text-sm text-destructive mt-1">{String(errors.new_password.message)}</p>
                 )}
               </div>
               <div>
@@ -90,7 +90,7 @@ function ResetPage() {
                   {...register('confirm_password', { required: 'Please confirm', validate: (v) => v === password || 'Passwords do not match' })}
                 />
                 {errors.confirm_password && (
-                  <p className="text-sm text-red-600 mt-1">{String(errors.confirm_password.message)}</p>
+                  <p className="text-sm text-destructive mt-1">{String(errors.confirm_password.message)}</p>
                 )}
               </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -100,7 +100,7 @@ function ResetPage() {
           )}
 
           <div className="mt-4 text-center">
-            <Link to="/auth/login" search={{ redirect: undefined }} className="text-sm text-blue-600 hover:text-blue-500">
+            <Link to="/auth/login" search={{ redirect: undefined }} className="text-sm text-primary hover:text-primary/80">
               Back to Sign In
             </Link>
           </div>

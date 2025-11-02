@@ -41,7 +41,7 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
@@ -55,7 +55,7 @@ function LoginPage() {
               <Input
                 type="email"
                 placeholder="Email"
-                {...register('email', { 
+                {...register('email', {
                   required: 'Email is required',
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -64,10 +64,10 @@ function LoginPage() {
                 })}
               />
               {errors.email && (
-                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
               )}
             </div>
-            
+
             <div>
               <Input
                 type="password"
@@ -75,18 +75,18 @@ function LoginPage() {
                 {...register('password', { required: 'Password is required' })}
               />
               {errors.password && (
-                <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+                <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
               )}
             </div>
-            
+
             {login.isError && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-destructive">
                 {String((login.error as any)?.message || 'Login failed')}
               </p>
             )}
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full"
               disabled={login.isPending}
             >
@@ -97,10 +97,10 @@ function LoginPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200" />
+                <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">
+                <span className="bg-background px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
@@ -114,17 +114,17 @@ function LoginPage() {
               Continue with Google
             </Button>
           </div>
-          
+
           <div className="mt-4 text-center">
             <Link
               to="/auth/reset"
-              className="text-sm text-blue-600 hover:text-blue-500 mr-4"
+              className="text-sm text-primary hover:text-primary/80 mr-4"
             >
               Forgot your password?
             </Link>
             <Link
               to="/auth/register"
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-sm text-primary hover:text-primary/80"
             >
               Don't have an account? Sign up
             </Link>
