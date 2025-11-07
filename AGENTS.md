@@ -245,6 +245,8 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 
 All configuration is managed through environment variables and Pydantic settings:
 
+> **Important**: When adding new environment variables to `.env.example`, always update the `backend/app/config.py` file to properly load them using Pydantic Field definitions with the appropriate `env` parameter.
+
 ```python
 # Key configuration options
 JWT_SECRET=              # Required: JWT signing secret
